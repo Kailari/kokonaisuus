@@ -27,18 +27,23 @@ impl<'a> System<'a> for AdderSystem {
         // Create a wrapper `TupleIterator` out of the component storage vectors' iterators
         let iter = IteratorTuple(iter_a, iter_b);
 
-        // Why are we allowed to do this? Where does the `for_each` come from?
+        // And what is going on here?
         //  1.  `IteratorTuple` implements the `Iterator` trait
         //  2.  The implementation states that the `type Item` is tuple of items from the iterators
         //      wrapped (`iter_a` and `iter_b` here)
         //  3.  `next()` -method is implemented to do just that
         //  4.  at top of this file, we have `use crate::tuple_iter::IteratorTuple;` which imports
         //      related `impl Trait` blocks, too, thus bringing the iterator implementation to scope
+        //  5.  `for x in y` accepts iterators for the `y` parameter. This basically does
+        //          `x = y.next()`
+        //      on every iteration.
+        //  6.  we de-structure the `x` and get mutable references to the components
         //
-        // Thus, after we have wrapped component storage iterators to a TupleIterator, we can just
-        // iterate on the wrapper and it poops out the components as pairs.
-        iter.for_each(|(value, amount)| {
-            value.value += amount.amount
-        });
+        // Thus, after we have wrapped component storage iterators (iter_a and iter_b) to a
+        // `TupleIterator`, we can just iterate on the wrapper and it poops out the components as
+        // tuples of components.
+        for (value, amount) in iter {
+            value.value += amount.amount;
+        };
     }
 }

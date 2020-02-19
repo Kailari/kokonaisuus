@@ -1,17 +1,17 @@
 use std::slice::IterMut;
 
+// TODO: Macro for generating implementations for n-dimensional tuples
+
 /// Simple struct for storing two iterators. Implements `Iterator` to be able to easily iterate on
 /// pairs of values from both.
-pub struct IteratorTuple<A, B>(pub A, pub B)
-    where A: Iterator,
-          B: Iterator;
+pub struct IteratorTuple<'a, A, B>(pub IterMut<'a, A>, pub IterMut<'a, B>);
 
-/// Implement iterator for TupleIterator. This implementation works by advancing both of the stored
-/// iterators and returning None once either of the iterators is finished (Iterator is "finished"
-/// once it returns None for the first time)
-///
-/// Type parameters represent the items provided by the child iterators.
-impl<'a, A, B> Iterator for IteratorTuple<IterMut<'a, A>, IterMut<'a, B>> {
+// Implement iterator for `TupleIterator`. This implementation works by advancing both of the stored
+// iterators and returning `None` once either of the iterators is finished (Iterator is considered
+// "finished" once it returns `None` for the first time)
+//
+// Type parameters represent the items provided by the child iterators.
+impl<'a, A, B> Iterator for IteratorTuple<'a, A, B> {
     // Make this iterator produce tuples of the wrapped iterators' items
     type Item = (&'a mut A, &'a mut B);
 
@@ -33,5 +33,26 @@ impl<'a, A, B> Iterator for IteratorTuple<IterMut<'a, A>, IterMut<'a, B>> {
             // In all other cases (either one or both were None), just return None
             _ => None,
         }
+    }
+}
+
+// Trait for creating iterator tuples. This exists mainly because "you cannot impl traits that are
+// defined in other crates for arbitrary types" (which prevents us from implementing `Iterator` for
+// sized tuples). Creating a separate trait and using that is the "official" way to go, it seems.
+//
+// In other words:  We cannot write `impl<X, Y> Iterator for (X, Y)` (implement `Iterator` for tuple) as
+//                  the compiler prevents this for 'security reasons' as we haven't ourselves declared
+//                  neither of those types. Specifically, the trait must be our own to be able to define
+//                  it for non-concrete or arbitrary type. (tuples are considered "arbitrary")
+// TL;DR:           We cannot implement iterator for tuples due to language constraints. This is for
+//                  the `impl`-block below.
+pub trait IterableTuple<'a, A, B> {
+    fn iterator(&'a mut self) -> IteratorTuple<'a, A, B>;
+}
+
+// Allows us to write `(a, b).iterator()` if `a` and `b` are vectors. Return value is a `IteratorTuple`
+impl<'a, A, B> IterableTuple<'a, A, B> for (&'a mut Vec<A>, &'a mut Vec<B>) {
+    fn iterator(&'a mut self) -> IteratorTuple<'a, A, B> {
+        IteratorTuple::<'a, A, B>(self.0.iter_mut(), self.1.iter_mut())
     }
 }

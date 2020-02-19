@@ -5,7 +5,6 @@ mod systems;
 mod components;
 mod tuple_iter;
 
-
 fn main() {
     // Create components
     let mut value_components = vec![
