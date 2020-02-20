@@ -1,23 +1,25 @@
 use std::slice::IterMut;
 
-use crate::components::{AmountComponent, ValueComponent};
-
 pub trait IterableTuple<'a, A> {
     fn iterator(&'a mut self) -> A;
 }
 
-// Compiler bugs out when indexing tuples in macros. Wrapping tuple index to this allows performing
-// the indexing operation without getting unexpected token errors.
-macro_rules! token_workaround {
-    ($x: expr) => ($x);
-}
+// Compiler bugs out in some specific scenarios when indexing tuples in macros. Wrapping the tuple
+// element index with this allows performing the indexing operation without getting errors due to
+// unexpected tokens.
+// XXX: Not needed on certain toolchain versions? Works on desktop but not on arch laptop. This
+//      issue needs more investigation.
+// macro_rules! token_workaround {
+//     ($x: expr) => ($x);
+// }
 
 macro_rules! define_iterator_tuple {
-    ($tuple_name:ident, $( ($i:tt, $item_name:ident, $types:ty) ),*) => {
-        pub struct $tuple_name<'a>($(IterMut<'a, $types>),*);
+    ($tuple_name:ident, $( ($i:tt, $item_name:ident, $type_name:ident) ),*) => {
+        pub struct $tuple_name<'a, $( $type_name ),*>($( IterMut<'a, $type_name> ),*);
 
-        impl<'a> Iterator for $tuple_name<'a> {
-            type Item = ($(&'a mut $types),*);
+        impl<'a, $( $type_name ),*> Iterator for $tuple_name<'a, $( $type_name ),*> {
+            #[allow(unused_parens)] // "1-tuples" generates warnings. Suppress them.
+            type Item = ($(&'a mut $type_name),*);
 
             fn next(&mut self) -> Option<Self::Item> {
                 #[allow(unused_parens)] // "1-tuples" generates warnings. Suppress them.
@@ -28,13 +30,13 @@ macro_rules! define_iterator_tuple {
             }
         }
 
-        impl<'a> IterableTuple<'a, $tuple_name<'a>> for (($(&'a mut Vec<$types>),*,)) {
-            fn iterator(&'a mut self) -> $tuple_name<'a> {
-                $tuple_name ($( token_workaround!(self.$i).iter_mut() ),*)
+        impl<'a, $( $type_name ),*> IterableTuple<'a, $tuple_name<'a, $( $type_name ),*>> for ($( &'a mut Vec<$type_name> ),*,) {
+            fn iterator(&'a mut self) -> $tuple_name<'a, $( $type_name ),*> {
+                $tuple_name ($( self.$i.iter_mut() ),*)
             }
         }
     };
 }
 
-define_iterator_tuple!(ValueIterator, (0, value, ValueComponent));
-define_iterator_tuple!(IteratorPairA, (0, value, ValueComponent), (1, amount, AmountComponent));
+define_iterator_tuple!(ValueIterator, (0, a, A));
+define_iterator_tuple!(IteratorPairA, (0, a, A), (1, b, B));
