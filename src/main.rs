@@ -1,5 +1,5 @@
 use crate::components::{AmountComponent, ValueComponent};
-use crate::systems::{AdderSystem, PrintSystem, System};
+use crate::systems::{AdderSystem, PrintSystem, System, ValuePrintSystem};
 
 mod systems;
 mod components;
@@ -23,6 +23,7 @@ fn main() {
     // Create systems
     let adder = AdderSystem;
     let printer = PrintSystem;
+    let value_printer = ValuePrintSystem;
 
     // Print initial state
     println!("Initial state:");
@@ -37,4 +38,7 @@ fn main() {
     println!("After tick #2:");
     adder.tick((&mut value_components, &mut amount_components));
     printer.tick((&mut value_components, &mut amount_components));
+
+    println!("Values only:");
+    value_printer.tick((&mut value_components,));
 }

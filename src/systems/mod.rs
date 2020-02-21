@@ -4,6 +4,7 @@ mod value_printer;
 
 pub use adder::AdderSystem;
 pub use printer::PrintSystem;
+pub use value_printer::ValuePrintSystem;
 
 /// System trait. Provides `tick`-method for running the system.
 pub trait System<'a> {

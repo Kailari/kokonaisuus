@@ -1,6 +1,6 @@
 use crate::components::{AmountComponent, ValueComponent};
 use crate::systems::System;
-use crate::tuple_iter::{IterableTuple};
+use crate::tuple_iter::StorageTuple;
 
 /// System for incrementing values by their respective increments.
 pub struct AdderSystem;

@@ -1,6 +1,6 @@
 use crate::components::{AmountComponent, ValueComponent};
 use crate::systems::System;
-use crate::tuple_iter::IterableTuple;
+use crate::tuple_iter::StorageTuple;
 
 /// System for printing the value and increment pairs.
 pub struct PrintSystem;
