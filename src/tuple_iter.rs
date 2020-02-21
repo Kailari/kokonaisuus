@@ -1,6 +1,8 @@
 use std::marker::PhantomData;
 use std::slice::IterMut;
 
+use crate::components::{Storage, ComponentStorage};
+
 /// Tuple of storages. Something we want to be able to create component/data iterator from.
 pub trait StorageTuple<'a> {
     type Items;
@@ -57,12 +59,12 @@ impl<I, V> Iterator for TupleIter<I, V>
 macro_rules! define_iterator_tuple {
     ($( ($i:tt, $item_name:ident, $type_name:ident) ),*) => {
         // Implement `StorageTuple` for tuple of vectors
-        impl<'a, $($type_name),*> StorageTuple<'a> for ($( &'a mut Vec<$type_name> ),*,) {
+        impl<'a, $($type_name),*> StorageTuple<'a> for ($( &'a mut ComponentStorage<$type_name> ),*,) {
             type Iterators = ($( IterMut<'a, $type_name> ),*,);
             type Items = ($( &'a mut $type_name ),*,);
 
             fn iterator(&'a mut self) -> TupleIter<Self::Iterators, Self::Items> {
-                TupleIter::from(($( self.$i.iter_mut() ),*,))
+                TupleIter::from(($( self.$i.fetch_for_writing().iter_mut() ),*,))
             }
         }
 

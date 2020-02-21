@@ -1,4 +1,4 @@
-use crate::components::{AmountComponent, ValueComponent};
+use crate::components::{AmountComponent, ValueComponent, ComponentStorage};
 use crate::systems::System;
 use crate::tuple_iter::StorageTuple;
 
@@ -6,8 +6,8 @@ use crate::tuple_iter::StorageTuple;
 pub struct AdderSystem;
 
 impl<'a> System<'a> for AdderSystem {
-    type Data = (&'a mut Vec<ValueComponent>,
-                 &'a mut Vec<AmountComponent>);
+    type Data = (&'a mut ComponentStorage<ValueComponent>,
+                 &'a mut ComponentStorage<AmountComponent>);
 
     // The tick function itself. "Iterates over data and performs some reading or mutating."
     fn tick(&self, (values, amounts): Self::Data) {

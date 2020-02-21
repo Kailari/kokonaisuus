@@ -1,4 +1,4 @@
-use crate::components::{AmountComponent, ValueComponent};
+use crate::components::{AmountComponent, ValueComponent, ComponentStorage};
 use crate::systems::System;
 use crate::tuple_iter::StorageTuple;
 
@@ -6,8 +6,8 @@ use crate::tuple_iter::StorageTuple;
 pub struct PrintSystem;
 
 impl<'a> System<'a> for PrintSystem {
-    type Data = (&'a mut Vec<ValueComponent>,
-                 &'a mut Vec<AmountComponent>);
+    type Data = (&'a mut ComponentStorage<ValueComponent>,
+                 &'a mut ComponentStorage<AmountComponent>);
 
     // This is the compacted/improved way of doing things. See adder.rs for more readable version
     // without trait magic.
