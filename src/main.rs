@@ -1,9 +1,11 @@
 use crate::components::{AmountComponent, ComponentStorage, ValueComponent};
 use crate::systems::{AdderSystem, PrintSystem, System, ValuePrintSystem};
+use crate::storage_tuple_iter::{Write, Read};
 
 mod systems;
 mod components;
 mod tuple_iter;
+mod storage_tuple_iter;
 
 fn main() {
     // Create components
@@ -31,12 +33,12 @@ fn main() {
 
     // Advance a single tick and print state
     println!("After tick #1:");
-    adder.tick((&mut values, &mut amounts));
+    adder.tick((Write::new(&mut values), Read::new(&mut amounts)));
     printer.tick((&mut values, &mut amounts));
 
     // Advance another tick and print state
     println!("After tick #2:");
-    adder.tick((&mut values, &mut amounts));
+    adder.tick((Write::new(&mut values), Read::new(&mut amounts)));
     printer.tick((&mut values, &mut amounts));
 
     println!("Values only:");

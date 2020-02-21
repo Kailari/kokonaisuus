@@ -13,9 +13,9 @@ pub struct AmountComponent {
 pub trait Storage<'a> {
     type Component;
 
-    fn fetch_for_reading(&self) -> &Vec<Self::Component>;
+    fn fetch_for_reading(&'a self) -> &'a Vec<Self::Component>;
 
-    fn fetch_for_writing(&mut self) -> &mut Vec<Self::Component>;
+    fn fetch_for_writing(&'a mut self) -> &'a mut Vec<Self::Component>;
 }
 
 // TODO:    access queue, with parallel read and exclusive write. Calling .iterator() on a storage
@@ -35,11 +35,11 @@ impl<C> ComponentStorage<C> {
 impl<'a, C> Storage<'a> for ComponentStorage<C> {
     type Component = C;
 
-    fn fetch_for_reading(&self) -> &Vec<C> {
+    fn fetch_for_reading(&'a self) -> &'a Vec<C> {
         &self.components
     }
 
-    fn fetch_for_writing(&mut self) -> &mut Vec<C> {
+    fn fetch_for_writing(&'a mut self) -> &'a mut Vec<C> {
         &mut self.components
     }
 }
