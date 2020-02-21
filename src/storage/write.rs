@@ -1,6 +1,8 @@
 use crate::storage::{ComponentStorage, Fetch};
 use std::slice::IterMut;
 
+/// Provides read/write access to a component storage. Implements [`Fetch`](../trait.Fetch.html) to
+/// provide mutable iterators to [`StorageTuple`s](../storage_tuple/trait.StorageTuple.html)
 pub struct Write<'a, C> {
     storage: &'a mut ComponentStorage<C>,
 }

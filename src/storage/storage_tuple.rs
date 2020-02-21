@@ -2,6 +2,8 @@ use std::marker::PhantomData;
 
 use crate::storage::Fetch;
 
+/// Creates tuples of items from tuples of iterators. Internally used as part of the
+/// `ComponentStorage` pipeline and should never be implemented directly.
 pub trait IteratorTuple<'a, A> {
     type Item;
 
@@ -75,7 +77,7 @@ macro_rules! define_tuple {
         // Very similarly to how storage tuples are declared, we expand type names to type params.
         // Here, each expansion on their own line, what this expands to:
         impl<'a, $($type_name),*>               // Expands to `impl<'a, A, B, ...>`
-        IteratorTuple<'a, ($($type_name),*,)>    // Expands to `IteratorTuple<'a, A, B, ...>`
+        IteratorTuple<'a, ($($type_name),*,)>   // Expands to `IteratorTuple<'a, A, B, ...>`
         for ($($type_name::Iterator),*,)        // Expands to `for (A::Iterator, B::Iterator, ...)`
         where $($type_name: Fetch<'a>),*        // Expands to `where A: Fetch<'a>, B: Fetch<'a>, ...`
         {
@@ -96,5 +98,16 @@ macro_rules! define_tuple {
     };
 }
 
-define_tuple! { (0, a, A) }
-define_tuple! { (0, a, A), (1, b, B) }
+// Define traits for tuples with up to 12 elements
+define_tuple!((0, a, A));
+define_tuple!((0, a, A), (1, b, B));
+define_tuple!((0, a, A), (1, b, B), (2, c, C));
+define_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D));
+define_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E));
+define_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E), (5, f, F));
+define_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E), (5, f, F), (6, g, G));
+define_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E), (5, f, F), (6, g, G), (7, h, H));
+define_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E), (5, f, F), (6, g, G), (7, h, H), (8, i, I));
+define_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E), (5, f, F), (6, g, G), (7, h, H), (8, i, I), (9, j, J));
+define_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E), (5, f, F), (6, g, G), (7, h, H), (8, i, I), (9, j, J), (10, k, K));
+define_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E), (5, f, F), (6, g, G), (7, h, H), (8, i, I), (9, j, J), (10, k, K), (11, l, L));

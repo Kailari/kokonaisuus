@@ -1,6 +1,8 @@
 use crate::storage::{ComponentStorage, Fetch};
 use std::slice::Iter;
 
+/// Provides read-only access to a component storage. Implements [`Fetch`](../trait.Fetch.html) to
+/// provide immutable iterators to [`StorageTuple`s](../storage_tuple/trait.StorageTuple.html)
 pub struct Read<'a, C> {
     storage: &'a ComponentStorage<C>,
 }

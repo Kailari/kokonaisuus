@@ -5,8 +5,6 @@ use crate::storage::{ComponentStorage, Write, Read};
 mod systems;
 mod components;
 mod storage;
-mod tuple_iter;
-mod storage_tuple_iter;
 
 fn main() {
     // Create components
@@ -43,5 +41,5 @@ fn main() {
     printer.tick((Read::new(&values), Read::new(&amounts)));
 
     println!("Values only:");
-    value_printer.tick((Read::new(&values), Read::new(&values)));
+    value_printer.tick((Read::new(&values),));
 }
