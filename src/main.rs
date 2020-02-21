@@ -1,9 +1,10 @@
-use crate::components::{AmountComponent, ComponentStorage, ValueComponent};
+use crate::components::{AmountComponent, ValueComponent};
 use crate::systems::{AdderSystem, PrintSystem, System, ValuePrintSystem};
-use crate::storage_tuple_iter::{Write, Read};
+use crate::storage::{ComponentStorage, Write, Read};
 
 mod systems;
 mod components;
+mod storage;
 mod tuple_iter;
 mod storage_tuple_iter;
 
@@ -15,7 +16,7 @@ fn main() {
         ValueComponent { value: 2 },
         ValueComponent { value: 3 },
     ]);
-    let mut amounts = ComponentStorage::from(vec![
+    let amounts = ComponentStorage::from(vec![
         AmountComponent { amount: 4 },
         AmountComponent { amount: 3 },
         AmountComponent { amount: 2 },
@@ -29,18 +30,18 @@ fn main() {
 
     // Print initial state
     println!("Initial state:");
-    printer.tick((&mut values, &mut amounts));
+    printer.tick((Read::new(&values), Read::new(&amounts)));
 
     // Advance a single tick and print state
     println!("After tick #1:");
-    adder.tick((Write::new(&mut values), Read::new(&mut amounts)));
-    printer.tick((&mut values, &mut amounts));
+    adder.tick((Write::new(&mut values), Read::new(&amounts)));
+    printer.tick((Read::new(&values), Read::new(&amounts)));
 
     // Advance another tick and print state
     println!("After tick #2:");
-    adder.tick((Write::new(&mut values), Read::new(&mut amounts)));
-    printer.tick((&mut values, &mut amounts));
+    adder.tick((Write::new(&mut values), Read::new(&amounts)));
+    printer.tick((Read::new(&values), Read::new(&amounts)));
 
     println!("Values only:");
-    value_printer.tick((&mut values, ));
+    value_printer.tick((Read::new(&values), Read::new(&values)));
 }

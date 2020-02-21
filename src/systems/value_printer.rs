@@ -1,15 +1,17 @@
-use crate::components::{ValueComponent, ComponentStorage};
+use crate::components::ValueComponent;
+use crate::storage::Read;
+use crate::storage_tuple_iter::StorageTuple;
 use crate::systems::System;
-use crate::tuple_iter::StorageTuple;
 
 /// System for printing the value of a `ValueComponent`
 pub struct ValuePrintSystem;
 
 impl<'a> System<'a> for ValuePrintSystem {
-    type Data = (&'a mut ComponentStorage<ValueComponent>,);
+    type Data = (Read<'a, ValueComponent>,
+                 Read<'a, ValueComponent>);
 
-    fn tick(&self, (values,): Self::Data) {
-        for (value,) in (values,).iterator() {
+    fn tick(&self, (values, values2): Self::Data) {
+        for (value, _) in (values, values2).iterator() {
             println!("Value: {:?}", value.value)
         }
     }

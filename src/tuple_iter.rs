@@ -1,7 +1,6 @@
-use std::marker::PhantomData;
-use std::slice::IterMut;
 
-use crate::components::{Storage, ComponentStorage};
+/*
+use std::marker::PhantomData;
 
 /// Tuple of storages. Something we want to be able to create component/data iterator from.
 pub trait StorageTuple<'a> {
@@ -94,3 +93,4 @@ define_iterator_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E), (5
 define_iterator_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E), (5, f, F), (6, g, G), (7, h, H), (8, i, I), (9, j, J));
 define_iterator_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E), (5, f, F), (6, g, G), (7, h, H), (8, i, I), (9, j, J), (10, k, K));
 define_iterator_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E), (5, f, F), (6, g, G), (7, h, H), (8, i, I), (9, j, J), (10, k, K), (11, l, L));
+*/

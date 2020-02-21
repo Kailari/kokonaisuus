@@ -1,52 +1,5 @@
 use std::marker::PhantomData;
-use std::slice::{Iter, IterMut};
-
-use crate::components::{ComponentStorage, Storage};
-
-pub trait Fetch<'a> {
-    type Item;
-    type Iterator: Iterator<Item=Self::Item>;
-
-    fn fetch_iter(&'a mut self) -> Self::Iterator;
-}
-
-pub struct Write<'a, C> {
-    storage: &'a mut ComponentStorage<C>,
-}
-
-impl<'a, C> Write<'a, C> {
-    pub fn new(storage: &'a mut ComponentStorage<C>) -> Write<'a, C> {
-        Write { storage }
-    }
-}
-
-impl<'a, C> Fetch<'a> for Write<'a, C> {
-    type Item = &'a mut C;
-    type Iterator = IterMut<'a, C>;
-
-    fn fetch_iter(&'a mut self) -> Self::Iterator {
-        self.storage.fetch_for_writing().iter_mut()
-    }
-}
-
-pub struct Read<'a, C> {
-    storage: &'a ComponentStorage<C>,
-}
-
-impl<'a, C> Read<'a, C> {
-    pub fn new(storage: &'a ComponentStorage<C>) -> Read<'a, C> {
-        Read { storage }
-    }
-}
-
-impl<'a, C> Fetch<'a> for Read<'a, C> {
-    type Item = &'a C;
-    type Iterator = Iter<'a, C>;
-
-    fn fetch_iter(&'a mut self) -> Self::Iterator {
-        self.storage.fetch_for_reading().iter()
-    }
-}
+use crate::storage::Fetch;
 
 pub trait IteratorTuple<'a, A> {
     type Item;
@@ -80,10 +33,8 @@ impl<'a, A, B> StorageTuple<'a> for (A, B)
     where A: Fetch<'a>,
           B: Fetch<'a> {
     type Accessors = (A, B);
-    type Values = (<A as Fetch<'a>>::Item,
-                   <B as Fetch<'a>>::Item);
-    type Iterators = (<A as Fetch<'a>>::Iterator,
-                      <B as Fetch<'a>>::Iterator);
+    type Values = (A::Item, B::Item);
+    type Iterators = (A::Iterator, B::Iterator);
 
     fn iterator(&'a mut self) -> TupleIter<'a, Self::Accessors, Self::Iterators, Self::Values> {
         TupleIter {

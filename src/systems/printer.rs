@@ -1,13 +1,14 @@
-use crate::components::{AmountComponent, ValueComponent, ComponentStorage};
+use crate::components::{AmountComponent, ValueComponent};
+use crate::storage::Read;
+use crate::storage_tuple_iter::StorageTuple;
 use crate::systems::System;
-use crate::tuple_iter::StorageTuple;
 
 /// System for printing the value and increment pairs.
 pub struct PrintSystem;
 
 impl<'a> System<'a> for PrintSystem {
-    type Data = (&'a mut ComponentStorage<ValueComponent>,
-                 &'a mut ComponentStorage<AmountComponent>);
+    type Data = (Read<'a, ValueComponent>,
+                 Read<'a, AmountComponent>);
 
     // This is the compacted/improved way of doing things. See adder.rs for more readable version
     // without trait magic.
