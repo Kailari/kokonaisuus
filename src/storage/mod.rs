@@ -2,7 +2,7 @@ use std::sync::{Arc, RwLock};
 
 pub use read::{Read, StorageReader};
 pub use write::{Write, StorageWriter};
-pub use storage_tuple::IteratorTuple;
+pub use storage_tuple::{IteratorTuple, TupleIter, IntoIteratorTuple};
 
 mod read;
 mod write;

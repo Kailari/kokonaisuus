@@ -8,8 +8,12 @@ pub trait IteratorTuple: Sized {
     type Item;
 
     fn next_all(&mut self) -> Option<Self::Item>;
+}
 
-    fn iterator(self) -> TupleIter<Self>;
+pub trait IntoIteratorTuple: Sized {
+    type Iterators: IteratorTuple;
+
+    fn iterator(self) -> TupleIter<Self::Iterators>;
 }
 
 impl<T: IteratorTuple> Iterator for TupleIter<T> {
@@ -22,12 +26,9 @@ impl<T: IteratorTuple> Iterator for TupleIter<T> {
 
 macro_rules! define_tuple {
     ($(($i:tt, $item_name:ident, $type_name:ident)),+) => {
-        define_tuple! {
-            stor $(($i, $type_name)),+
-        }
-        define_tuple! {
-            iter $(($i, $item_name, $type_name)),+
-        }
+        define_tuple! { stor $(($i, $type_name)),+ }
+        define_tuple! { into $(($i, $type_name)),+ }
+        define_tuple! { iter $(($i, $item_name, $type_name)),+ }
     };
 
     (stor $(($i:tt, $type_name:ident)),+) => {
@@ -54,9 +55,17 @@ macro_rules! define_tuple {
                     _ => None,
                 }
             }
+        }
+    };
 
-            fn iterator(self) -> TupleIter<Self> {
-                TupleIter { iterators: self }
+    (into $(($i:tt, $type_name:ident)),+) => {
+        impl<'a, $($type_name),+> IntoIteratorTuple for ($($type_name),+,)
+            where $($type_name: IntoIterator),+
+        {
+            type Iterators = ($($type_name::IntoIter),+,);
+
+            fn iterator(self) -> TupleIter<Self::Iterators> {
+                TupleIter { iterators: ($(self.$i.into_iter()),+,) }
             }
         }
     }

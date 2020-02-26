@@ -1,7 +1,8 @@
-use crate::components::{AmountComponent, ValueComponent};
-use crate::storage::{Read, Write, StorageLock, IteratorTuple, StorageReader, StorageWriter};
-use crate::systems::System;
 use std::slice::{Iter, IterMut};
+
+use crate::components::{AmountComponent, ValueComponent};
+use crate::storage::{Read, StorageLock, StorageReader, StorageWriter, Write, IntoIteratorTuple};
+use crate::systems::System;
 
 /// System for incrementing values by their respective increments.
 pub struct AdderSystem;
@@ -31,8 +32,7 @@ impl<'a> System<'a> for AdderSystem {
     fn tick(&self, data: Self::Data) {
         let (mut values, amounts) = data.claim();
 
-        // TODO: Could we use deref/intoiter to do some magic tricks here?
-        for (value, amount) in ((&mut values).into_iter(), (&amounts).into_iter()).iterator() {
+        for (value, amount) in (&mut values, &amounts).iterator() {
             value.value += amount.amount;
         }
     }
