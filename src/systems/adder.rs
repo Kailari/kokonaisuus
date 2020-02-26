@@ -1,3 +1,5 @@
+use std::slice::{Iter, IterMut};
+
 use crate::components::{AmountComponent, ValueComponent};
 use crate::storage::{Read, StorageLock, Write};
 use crate::systems::System;
@@ -5,26 +7,48 @@ use crate::systems::System;
 /// System for incrementing values by their respective increments.
 pub struct AdderSystem;
 
+pub struct TupleIter<T: IteratorTuple> {
+    iterators: T,
+}
+
+impl<T: IteratorTuple> Iterator for TupleIter<T> {
+    type Item = T::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iterators.next_all()
+    }
+}
+
+pub trait IteratorTuple: Sized {
+    type Item;
+
+    fn next_all(&mut self) -> Option<Self::Item>;
+
+    fn iterator(self) -> TupleIter<Self>;
+}
+
+impl<'a> IteratorTuple for (IterMut<'a, ValueComponent>, Iter<'a, AmountComponent>) {
+    type Item = (&'a mut ValueComponent, &'a AmountComponent);
+
+    fn next_all(&mut self) -> Option<Self::Item> {
+        match (self.0.next(), self.1.next()) {
+            (Some(value), Some(amount)) => Some((value, amount)),
+            _ => None,
+        }
+    }
+
+    fn iterator(self) -> TupleIter<Self> {
+        TupleIter { iterators: self }
+    }
+}
+
 impl<'a> System<'a> for AdderSystem {
     type Data = (Write<'a, ValueComponent>,
                  Read<'a, AmountComponent>);
 
     fn tick(&self, (values, amounts): Self::Data) {
-        let mut value_lock = values.claim();
-        let amount_lock = amounts.claim();
-        let mut value_iter = value_lock.guard.iter_mut();
-        let mut amount_iter = amount_lock.guard.iter();
-        loop {
-            let next_value = value_iter.next();
-            let next_amount = amount_iter.next();
-            if let (Some(value), Some(amount)) = (next_value, next_amount) {
-                value.value += amount.amount;
-            } else {
-                break;
-            }
+        for (value, amount) in (values.claim().guard.iter_mut(), amounts.claim().guard.iter()).iterator() {
+            value.value += amount.amount;
         }
-        //for (value, amount) in (values, amounts).claim() {
-        //    value.value += amount.amount;
-        //};
     }
 }
