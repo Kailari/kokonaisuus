@@ -1,5 +1,3 @@
-use std::slice::{Iter, IterMut};
-
 use crate::components::{AmountComponent, ValueComponent};
 use crate::storage::{Read, StorageLock, Write};
 use crate::systems::System;
@@ -27,8 +25,11 @@ pub trait IteratorTuple: Sized {
     fn iterator(self) -> TupleIter<Self>;
 }
 
-impl<'a> IteratorTuple for (IterMut<'a, ValueComponent>, Iter<'a, AmountComponent>) {
-    type Item = (&'a mut ValueComponent, &'a AmountComponent);
+impl<'a, A, B> IteratorTuple for (A, B)
+    where A: Iterator,
+          B: Iterator
+{
+    type Item = (A::Item, B::Item);
 
     fn next_all(&mut self) -> Option<Self::Item> {
         match (self.0.next(), self.1.next()) {
