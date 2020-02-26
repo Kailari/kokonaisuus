@@ -20,12 +20,12 @@ impl<'a, C> ComponentStorage<C> {
     }
 
     /// Fetches the component vector for reading.
-    pub fn fetch_for_reading(&'a self) -> Read<'a, C> {
+    pub fn read(&'a self) -> Read<'a, C> {
         Read::new(self)
     }
 
     /// Fetches the component vector for writing.
-    pub fn fetch_for_writing(&'a mut self) -> Write<'a, C> {
+    pub fn write(&'a mut self) -> Write<'a, C> {
         Write::new(self)
     }
 }

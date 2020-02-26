@@ -1,3 +1,4 @@
+use std::slice::IterMut;
 use std::sync::RwLockWriteGuard;
 
 use crate::storage::{ComponentStorage, StorageLock};
@@ -24,4 +25,13 @@ impl<'a, C> StorageLock for Write<'a, C> {
 
 pub struct StorageWriter<'a, C> {
     pub guard: RwLockWriteGuard<'a, Vec<C>>,
+}
+
+impl<'a, 'b, A> IntoIterator for &'a mut StorageWriter<'b, A> {
+    type Item = &'a mut A;
+    type IntoIter = IterMut<'a, A>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.guard.iter_mut()
+    }
 }

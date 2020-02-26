@@ -1,6 +1,7 @@
 use std::sync::RwLockReadGuard;
 
 use crate::storage::{ComponentStorage, StorageLock};
+use std::slice::Iter;
 
 /// Provides read-only access to a component storage. Implements [`Fetch`](../trait.Fetch.html) to
 /// provide immutable iterators to [`StorageTuple`s](../storage_tuple/trait.StorageTuple.html)
@@ -24,4 +25,14 @@ impl<'a, C> StorageLock for Read<'a, C> {
 
 pub struct StorageReader<'a, C> {
     pub guard: RwLockReadGuard<'a, Vec<C>>,
+}
+
+
+impl<'a, 'b, A> IntoIterator for &'a StorageReader<'b, A> {
+    type Item = &'a A;
+    type IntoIter = Iter<'a, A>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.guard.iter()
+    }
 }
