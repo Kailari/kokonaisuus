@@ -1,45 +1,26 @@
 use crate::components::{AmountComponent, ValueComponent};
-use crate::storage::{Read, StorageLock, Write};
+use crate::storage::{Read, Write, StorageLock, IteratorTuple, StorageReader, StorageWriter};
 use crate::systems::System;
+use std::slice::{Iter, IterMut};
 
 /// System for incrementing values by their respective increments.
 pub struct AdderSystem;
 
-pub struct TupleIter<T: IteratorTuple> {
-    iterators: T,
-}
+impl<'a, 'b, A> IntoIterator for &'a StorageReader<'b, A> {
+    type Item = &'a A;
+    type IntoIter = Iter<'a, A>;
 
-impl<T: IteratorTuple> Iterator for TupleIter<T> {
-    type Item = T::Item;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.iterators.next_all()
+    fn into_iter(self) -> Self::IntoIter {
+        self.guard.iter()
     }
 }
 
-pub trait IteratorTuple: Sized {
-    type Item;
+impl<'a, 'b, A> IntoIterator for &'a mut StorageWriter<'b, A> {
+    type Item = &'a mut A;
+    type IntoIter = IterMut<'a, A>;
 
-    fn next_all(&mut self) -> Option<Self::Item>;
-
-    fn iterator(self) -> TupleIter<Self>;
-}
-
-impl<'a, A, B> IteratorTuple for (A, B)
-    where A: Iterator,
-          B: Iterator
-{
-    type Item = (A::Item, B::Item);
-
-    fn next_all(&mut self) -> Option<Self::Item> {
-        match (self.0.next(), self.1.next()) {
-            (Some(value), Some(amount)) => Some((value, amount)),
-            _ => None,
-        }
-    }
-
-    fn iterator(self) -> TupleIter<Self> {
-        TupleIter { iterators: self }
+    fn into_iter(self) -> Self::IntoIter {
+        self.guard.iter_mut()
     }
 }
 
@@ -47,8 +28,11 @@ impl<'a> System<'a> for AdderSystem {
     type Data = (Write<'a, ValueComponent>,
                  Read<'a, AmountComponent>);
 
-    fn tick(&self, (values, amounts): Self::Data) {
-        for (value, amount) in (values.claim().guard.iter_mut(), amounts.claim().guard.iter()).iterator() {
+    fn tick(&self, data: Self::Data) {
+        let (mut values, amounts) = data.claim();
+
+        // TODO: Could we use deref/intoiter to do some magic tricks here?
+        for (value, amount) in ((&mut values).into_iter(), (&amounts).into_iter()).iterator() {
             value.value += amount.amount;
         }
     }

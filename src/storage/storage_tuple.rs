@@ -1,6 +1,70 @@
+use crate::storage::StorageLock;
+
+pub struct TupleIter<T: IteratorTuple> {
+    iterators: T,
+}
+
+pub trait IteratorTuple: Sized {
+    type Item;
+
+    fn next_all(&mut self) -> Option<Self::Item>;
+
+    fn iterator(self) -> TupleIter<Self>;
+}
+
+impl<T: IteratorTuple> Iterator for TupleIter<T> {
+    type Item = T::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iterators.next_all()
+    }
+}
+
+macro_rules! define_tuple {
+    ($(($i:tt, $item_name:ident, $type_name:ident)),+) => {
+        define_tuple! {
+            stor $(($i, $type_name)),+
+        }
+        define_tuple! {
+            iter $(($i, $item_name, $type_name)),+
+        }
+    };
+
+    (stor $(($i:tt, $type_name:ident)),+) => {
+        impl<$($type_name),+> StorageLock for ($($type_name),+,)
+            where $($type_name: StorageLock),+
+        {
+            type Accessor = ($($type_name::Accessor),+,);
+
+            fn claim(self) -> Self::Accessor {
+                ($(self.$i.claim()),+,)
+            }
+        }
+    };
+
+    (iter $(($i:tt, $item_name:ident, $type_name:ident)),+) => {
+        impl<$($type_name),+> IteratorTuple for ($($type_name),+,)
+            where $($type_name: Iterator),+
+        {
+            type Item = ($($type_name::Item),+,);
+
+            fn next_all(&mut self) -> Option<Self::Item> {
+                match ($(self.$i.next()),+,) {
+                    ($(Some($item_name)),+,) => Some(($($item_name),+,)),
+                    _ => None,
+                }
+            }
+
+            fn iterator(self) -> TupleIter<Self> {
+                TupleIter { iterators: self }
+            }
+        }
+    }
+}
+
 // Define traits for tuples with up to 12 elements
-//define_tuple!((0, a, A));
-//define_tuple!((0, a, A), (1, b, B));
+define_tuple!((0, a, A));
+define_tuple!((0, a, A), (1, b, B));
 //define_tuple!((0, a, A), (1, b, B), (2, c, C));
 //define_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D));
 //define_tuple!((0, a, A), (1, b, B), (2, c, C), (3, d, D), (4, e, E));
