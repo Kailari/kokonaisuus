@@ -8,8 +8,8 @@ pub struct ValuePrintSystem;
 impl<'a> System<'a> for ValuePrintSystem {
     type Data = (Read<'a, ValueComponent>, );
 
-    fn tick(&self, data: Self::Data) {
-        let (values, ) = data.claim();
+    fn tick(&self, (value_lock,): Self::Data) {
+        let (values, ) = (&value_lock,).claim();
         for (value, ) in (&values, ).iterator() {
             println!("Value: {:?}", value.value)
         }

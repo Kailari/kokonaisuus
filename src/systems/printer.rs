@@ -9,8 +9,8 @@ impl<'a> System<'a> for PrintSystem {
     type Data = (Read<'a, ValueComponent>,
                  Read<'a, AmountComponent>);
 
-    fn tick(&self, data: Self::Data) {
-        let (values, amounts) = data.claim();
+    fn tick(&self, (value_lock, amount_lock): Self::Data) {
+        let (values, amounts) = (&value_lock, &amount_lock).claim();
         for (value, amount) in (&values, &amounts).iterator() {
             println!("Value: {:?}, Amount: {:?}", value.value, amount.amount)
         }
