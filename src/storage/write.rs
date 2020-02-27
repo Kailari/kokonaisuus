@@ -15,10 +15,10 @@ impl<'a, C> Write<'a, C> {
     }
 }
 
-impl<'a, C> StorageLock for Write<'a, C> {
-    type Accessor = StorageWriter<'a, C>;
+impl<'a: 'b, 'b, C> StorageLock<'a, 'b> for Write<'a, C> {
+    type Accessor = StorageWriter<'b, C>;
 
-    fn claim(self) -> Self::Accessor {
+    fn claim(&'b self) -> Self::Accessor {
         StorageWriter { guard: self.storage.components.write().unwrap() }
     }
 }

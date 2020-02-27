@@ -15,10 +15,10 @@ impl<'a, C> Read<'a, C> {
     }
 }
 
-impl<'a, C> StorageLock for Read<'a, C> {
-    type Accessor = StorageReader<'a, C>;
+impl<'a: 'b, 'b, C> StorageLock<'a, 'b> for Read<'a, C> {
+    type Accessor = StorageReader<'b, C>;
 
-    fn claim(self) -> Self::Accessor {
+    fn claim(&'b self) -> Self::Accessor {
         StorageReader { guard: self.storage.components.read().unwrap() }
     }
 }

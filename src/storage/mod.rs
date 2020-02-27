@@ -31,8 +31,8 @@ impl<'a, C> ComponentStorage<C> {
 }
 
 /// Accessor used to fetch a guard for claiming R or R/W access to a storage.
-pub trait StorageLock {
+pub trait StorageLock<'a: 'b, 'b> {
     type Accessor;
 
-    fn claim(self) -> Self::Accessor;
+    fn claim(&'b self) -> Self::Accessor;
 }

@@ -32,12 +32,12 @@ macro_rules! define_tuple {
     };
 
     (stor $(($i:tt, $type_name:ident)),+) => {
-        impl<$($type_name),+> StorageLock for ($($type_name),+,)
-            where $($type_name: StorageLock),+
+        impl<'a: 'b, 'b, $($type_name),+> StorageLock<'a, 'b> for ($($type_name),+,)
+            where $($type_name: StorageLock<'a, 'b>),+
         {
             type Accessor = ($($type_name::Accessor),+,);
 
-            fn claim(self) -> Self::Accessor {
+            fn claim(&'b self) -> Self::Accessor {
                 ($(self.$i.claim()),+,)
             }
         }
