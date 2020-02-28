@@ -1,6 +1,7 @@
 /*
 Step 2. Modules
-Topics: Modules
+Topics: Modules, impl without traits, Add -trait, Mul -trait, AddAssign -trait,
+        (bonus) deriving Copy/Clone, (bonus) Display -trait
 
 New here:
     -   Components have been moved under a `components` -module
