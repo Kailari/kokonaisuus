@@ -17,10 +17,39 @@ Notes:
     be OK, I guess.
 */
 
+// First of all, these are analogous to java's `import`-statements. There can be multiple imports
+// from same module on a single line.
 use self::components::{AccelerationComponent, FrictionComponent, PositionComponent, VelocityComponent};
 use self::systems::{apply_velocity, print_positions, apply_friction, apply_acceleration};
 use self::vector::Vector2d;
 
+// Here we declare submodules. This must always happen in `main.rs`, `lib.rs` or `mod.rs`.
+//
+// We have two kinds of modules present:
+//  A    src/components/mod.rs
+//  B    src/components/some_component.rs
+//  B    src/vector.rs
+//
+// A:   "components"-module has submodules, so it has to be defined using a directory called with
+//      name "components" and a `mod.rs` directly inside the folder. Anything defined in that
+//      `mod.rs` belongs directly to components module and can be imported using
+//
+//          use crate::components::AnythingDefinedInModFile
+//
+//      Import may begin with "crate" or "self" if we want to use crate-root (starting from `src/`)
+//      or module-root (starting from current file's location) -relative paths. These are required
+//      when referring to things inside our current "crate" (project)
+//
+// B:   "vector"-module has no submodules, thus it is defined directly in a file named `vector.rs`.
+//      if later on we would need submodules, the file would need to be be renamed to `mod.rs` and
+//      moved to `vector/mod.rs`
+//
+//      some_component.rs is also a simple module without submodules. It is contained within
+//      components-module, thus it is submodule of "components" and `components/mod.rs` must have
+//
+//          pub mod some_component;
+//
+//      in order to make it accessible.
 mod components;
 mod systems;
 mod vector;
