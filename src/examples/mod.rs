@@ -1,12 +1,15 @@
-mod step0;
-mod step1;
-mod step2;
+macro_rules! define_step_module {
+    ($module:ident, $feature:literal) => {
+        mod $module;
 
-#[cfg(feature = "step_0")]
-pub fn run() { step0::main(); }
+        #[cfg(feature = $feature)]
+        pub fn run() {
+            $module::main();
+        }
+    };
+}
 
-#[cfg(feature = "step_1")]
-pub fn run() { step1::main(); }
-
-#[cfg(feature = "step_2")]
-pub fn run() { step2::main(); }
+define_step_module! { step0, "step_0" }
+define_step_module! { step1, "step_1" }
+define_step_module! { step2, "step_2" }
+define_step_module! { step3, "step_3" }
