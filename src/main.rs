@@ -1,12 +1,24 @@
-use crate::components::{AmountComponent, ValueComponent};
-use crate::systems::{AdderSystem, System, PrintSystem, ValuePrintSystem};
-use crate::storage::{ComponentStorage};
+#![feature(assoc_int_consts)] // Allows use of things like `f64::EPSILON`
+#![allow(dead_code)] // Examples generate a lot of dead code, allow it
 
 mod systems;
 mod components;
 mod storage;
+mod examples;
 
+#[cfg(feature = "examples")]
+fn main () {
+    examples::run();
+}
+
+#[cfg(not(feature = "examples"))]
 fn main() {
+    // NOTE: These would be usually at the top of the file. Due to examples feature flag thingies,
+    //       these are here to avoid warnings on unused imports when running examples
+    use crate::components::{AmountComponent, ValueComponent};
+    use crate::systems::{AdderSystem, System, PrintSystem, ValuePrintSystem};
+    use crate::storage::{ComponentStorage};
+
     // Create components
     let mut values = ComponentStorage::from(vec![
         ValueComponent { value: 0 },
