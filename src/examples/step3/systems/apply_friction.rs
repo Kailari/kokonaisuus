@@ -4,6 +4,9 @@ use std::slice::{IterMut, Iter};
 
 // Implement `IteratorTuple` for the component iterators required by this "system"
 impl<'a> IteratorTuple for (IterMut<'a, VelocityComponent>, Iter<'a, FrictionComponent>) {
+    // Here is an example without fully-qualified trait syntax. When `VelocityComponent` and
+    // `FrictionComponent` get passed as type parameters down to `IterMut` and `Iter`, these are
+    // the types those iterators will produce (that is `Iterator::Item` for those iterators)
     type ItemTuple = (&'a mut VelocityComponent,
                       &'a FrictionComponent);
 

@@ -4,8 +4,8 @@ pub struct AccelerationComponent {
     pub value: Vector2d,
 }
 
-impl From<Vector2d> for AccelerationComponent {
-    fn from(source: Vector2d) -> Self {
-        AccelerationComponent { value: source, }
+impl AccelerationComponent {
+    pub fn new(x: f64, y: f64) -> Self {
+        AccelerationComponent { value: Vector2d::from((x, y)) }
     }
 }
