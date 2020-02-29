@@ -1,16 +1,30 @@
 /*
-Step 6.
-Topics:
+Step 6. Actual systems
+Topics: First peek at lifetimes, lifetime elision in method scope
 
 New here:
-    -   TODO
+    -   Systems now use a shared `System`-trait, which provides a `tick()`-method
+    -   System arguments are defined using associated type on system trait
+    -   There are lifetimes required! :o (sadly, they are required for odd reasons, but anyways)
 
 Notes:
+    In order to be able to start planning the dispatcher, first thing is to unify the way we handle
+    the actual system dispatch. The solution was to actually turn system functions into concrete
+    instances of something that implements a common `System` -trait.
 
+    Now, when all systems are actual `Systems`, we can call a method from that trait (to be precise,
+    `System::tick`) to execute the system. Apart from that, nothing has changed. Trait brought in
+    a tad bit of complexity to how we can handle systems requiring varying number of component
+    vectors of all sorts of types, but there is nothing too fancy going on.
+
+
+    Next up, we need to start taking steps towards centralizing component storage, so that we could
+    automatically determine which component vectors to pass to `.tick()`. I have very vague idea on
+    how this can be done, but it might prove challenging.
 */
 
 use self::components::{AccelerationComponent, FrictionComponent, PositionComponent, VelocityComponent};
-use crate::examples::step6::systems::{PrintStateSystem, ApplyAccelerationSystem, ApplyFrictionSystem, ApplyVelocitySystem, PrintPositionsSystem, System};
+use self::systems::{PrintStateSystem, ApplyAccelerationSystem, ApplyFrictionSystem, ApplyVelocitySystem, PrintPositionsSystem, System};
 
 mod components;
 mod systems;
@@ -49,7 +63,8 @@ pub fn main() {
     let apply_friction = ApplyFrictionSystem;
     let apply_velocity = ApplyVelocitySystem;
 
-    // Print the initial state
+    // Note that we are no longer calling "some imported functions from global namespace", but
+    // rather `.tick()` method for instances of structs that implement `System`-trait.
     println!("Initial state:");
     print_state.tick((&positions, &velocities, &accelerations, &frictions));
 
@@ -58,5 +73,5 @@ pub fn main() {
     apply_velocity.tick((&mut positions, &velocities));
 
     println!("\nPositions at the end:");
-    print_positions.tick((&positions));
+    print_positions.tick(&positions);
 }
