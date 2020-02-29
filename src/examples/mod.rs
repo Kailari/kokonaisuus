@@ -14,3 +14,4 @@ define_step_module! { step1, "step_1" }
 define_step_module! { step2, "step_2" }
 define_step_module! { step3, "step_3" }
 define_step_module! { step4, "step_4" }
+define_step_module! { step5, "step_5" }
