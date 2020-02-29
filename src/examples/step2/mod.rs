@@ -11,6 +11,10 @@ New here:
     -   `Display`-trait implementation for `PositionComponent` for nicer printing
 
 Notes:
+    Goal is to break down the behavior in modules so that everything no longer resides in a single
+    file. This brings us more flexibility in future when files stay clean and are thus easier to
+    work with.
+
     The `From`-trait seems not to have been very good idea for components, probably going to scrap
     it for the next step.
 

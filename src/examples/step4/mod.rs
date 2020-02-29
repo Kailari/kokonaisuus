@@ -1,29 +1,24 @@
 /*
-Step 3. Iterating tuples of iterators
-Topics: Custom traits, Iterators, implementing traits on types we haven't defined ourselves
+Step 4. Generifying IteratorTuples
+Topics: Arbitrary type parameters in trait implementation
 
 New here:
-    -   "Systems" now use `for`-loops for iterating over the component iterators
-    -   Created utility traits for combining tuples of iterators into a single tuple-producing
-        iterator. Iterators in iterators, yay!
-    -   Cleaned up component creation with custom constructor-functions (`Component::new`)
+    -   Single implementation for all 2-tuples of iterators. This can be found in `iter.rs`
+    -   Other than that, only changes to other files are the fact that the boilerplate-
+        implementations of `IteratorTuple` have magically disappeared from system modules.
 
 Notes:
-    Goal here is to get rid of the ugly `while-let` syntax in systems. Idea is simple: if we have
-    an tuple filled with iterators, shouldn't we be allowed to iterate on it? To accomplish this,
-    a fair bit of trait magic is required (actually no magic involved, the approach is just a bit
-    unintuitive due to language limitations).
+    So, last time we added concept of `IteratorTuple`s using a custom trait. This required us to
+    write a lot of boilerplate in system modules. This time, we want to reduce that boilerplate down
+    to a single implementation using a few tricks involving generics.
 
-    All "systems" implement `IteratorTuple`-trait for their component iterators manually. (See top
-    of each system module. `apply_velocity.rs` has the most documentation about what's going on, so
-    see that and the `iter.rs`)
+    Note also that our implementation does not care whether or not the specific iterators are
+    `IterMut`, `Iter` or some other iterator completely. We can use a single implementation for all
+    those cases using the lowest common level of abstraction, the `Iterator`-trait.
 
-    Current one-IteratorTuple-impl-per-system implementation is a bit iffy, but we'll look into that
-    in next part.
-
-    TL;DR:
-        -   See `apply_velocity.rs`
-        -   See `iter.rs`
+    Now, we are limited to 2-tuples as that's the only tuple we've implemented `IteratorTuple` on.
+    In next part, we'll look into using macros to generate us a metric ton of other similar
+    implementations on larger tuples.
 */
 
 use self::components::{AccelerationComponent, FrictionComponent, PositionComponent, VelocityComponent};

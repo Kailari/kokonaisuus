@@ -2,9 +2,13 @@
   <dictionary name="ilari">
     <words>
       <w>bitmask</w>
+      <w>desugared</w>
+      <w>desugars</w>
+      <w>generifying</w>
       <w>heittää</w>
       <w>kaiken</w>
       <w>konna</w>
+      <w>newtype</w>
       <w>rustup</w>
       <w>signum</w>
       <w>sqrt</w>
