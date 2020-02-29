@@ -1,6 +1,6 @@
 /*
-Step 3.
-Topics:
+Step 3. Iterating tuples of iterators
+Topics: Custom traits, Iterators, implementing traits on types we haven't defined ourselves
 
 New here:
     -   "Systems" now use `for`-loops for iterating over the component iterators
