@@ -1,18 +1,6 @@
 use std::ops::{Add, Mul, AddAssign, Sub};
 use std::fmt::{Display, Formatter};
 
-// What on earth does "derive" mean? There usually is an easy or straightforward way of implementing
-// some common behavior on some new struct. However, writing those trivial implementations is quite
-// cumbersome. Derive-annotation allows us to generate some default implementations for common
-// traits.
-//
-// In this case, we implement the copy and clone traits which allow creating simple copies of
-// instances. It is easily seen that in this case, the task of copying instances of `Vector` is
-// a fairly trivial component-by-component copy task. The code generator is smart enough to figure
-// it out. We just have to explicitly tell it to generate the code, and to do that we need the
-// derive-annotation.
-//
-// Refer to chapters 3 and 4 for explanation on what Copy/Clone traits imply.
 #[derive(Copy, Clone)]
 pub struct Vector2d {
     pub x: f64,

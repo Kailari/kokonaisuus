@@ -5,9 +5,9 @@ pub struct PositionComponent {
     pub value: Vector2d,
 }
 
-impl From<Vector2d> for PositionComponent {
-    fn from(source: Vector2d) -> Self {
-        PositionComponent { value: source, }
+impl PositionComponent {
+    pub fn new(x: f64, y: f64) -> Self {
+        PositionComponent { value: Vector2d::from((x, y)), }
     }
 }
 
