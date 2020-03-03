@@ -4,7 +4,11 @@ Topics: Trait objects (the dyn-keyword), Bypassing compile-time borrow checking,
         Heap allocations (Box)
 
 New here:
-    -   TODO
+    -   Component storage now stores the components on the heap
+    -   Component storage vectors can no longer be accessed directly, one must now use
+        `fetch_ref/mut` -methods to get storage references
+    -   Dispatcher is updated to reflect these changes
+    -   All notable changes are in component storage
 
 Notes:
     This is a seemingly large step, although we accomplish nothing but manage to add rather unsafe
