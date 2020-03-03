@@ -1,18 +1,5 @@
 use crate::components::{FrictionComponent, VelocityComponent};
-use crate::iter::{IteratorTuple, IterTuple};
-use std::slice::{IterMut, Iter};
-
-impl<'a> IteratorTuple for (IterMut<'a, VelocityComponent>, Iter<'a, FrictionComponent>) {
-    type ItemTuple = (&'a mut VelocityComponent,
-                      &'a FrictionComponent);
-
-    fn next_all(&mut self) -> Option<Self::ItemTuple> {
-        match (self.0.next(), self.1.next()) {
-            (Some(vel), Some(fri)) => Some((vel, fri)),
-            _ => None,
-        }
-    }
-}
+use crate::iter::IterTuple;
 
 pub fn apply_friction(velocities: &mut Vec<VelocityComponent>, frictions: &Vec<FrictionComponent>) {
     let vel_iter = velocities.iter_mut();
