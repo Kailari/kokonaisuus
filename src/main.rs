@@ -1,57 +1,101 @@
-#![feature(assoc_int_consts)] // Allows use of things like `f64::EPSILON`
-#![allow(dead_code)] // Examples generate a lot of dead code, allow it
+/*
+Step 0. "Just the minimal something that gets the job done"
+Topics: Structs, Vectors, (a bit less than The Basics of) Iterators, Shadowing
+        inline pattern matching (while-let),
 
-mod systems;
-mod components;
-mod storage;
-mod examples;
+What do we begin with:
+    -   main-function
+    -   2 component structs
+    -   a few iterators
+    -   a few while-let -loops
 
-#[cfg(feature = "examples")]
-fn main () {
-    examples::run();
+Notes:
+    We have a collection of positions and another for velocities. We would like to translate the
+    positions by the velocities so that `pos[i] = pos[i] + vel[i]`, where `i` is an index in range
+    `0..n`, with `n` being the number of components in each collection.
+
+    Let's get to work: Initialize the component vectors, create iterators and then just iterate and
+    perform any data manipulation required. Easy, right?
+
+    Now, while this "works", there are a number of limitations here
+        1.  Iterators have to be initialized separately, creating a lot of clutter
+        2.  Even with while-let, the loop is mighty ugly and with more than two components, it could
+            get unwieldy quite quick. On the other hand if we could use actual iterators, that would
+            allow using `.filter()`, `.map()`, `.fold()`, etc. on the component collections. Is that
+            useful? I have no clue, but that would be neat!
+        3.  Later down the line, when we want to parallelize things, raw vectors are not going to
+            cut it anymore.
+*/
+
+// Here we define a `struct`. Struct is a simple collection of data. The variables inside the struct
+// are called "fields". Each field must have a name and a type.
+// (For more info on structs, refer to chapter 5.)
+struct PositionComponent {
+    x: f64,
+    y: f64,
 }
 
-#[cfg(not(feature = "examples"))]
-fn main() {
-    // NOTE: These would be usually at the top of the file. Due to examples feature flag thingies,
-    //       these are here to avoid warnings on unused imports when running examples
-    use crate::components::{AmountComponent, ValueComponent};
-    use crate::systems::{AdderSystem, System, PrintSystem, ValuePrintSystem};
-    use crate::storage::{ComponentStorage};
+struct VelocityComponent {
+    x: f64,
+    y: f64,
+}
 
-    // Create components
-    let mut values = ComponentStorage::from(vec![
-        ValueComponent { value: 0 },
-        ValueComponent { value: 1 },
-        ValueComponent { value: 2 },
-        ValueComponent { value: 3 },
-    ]);
-    let amounts = ComponentStorage::from(vec![
-        AmountComponent { amount: 4 },
-        AmountComponent { amount: 3 },
-        AmountComponent { amount: 2 },
-        AmountComponent { amount: 1 },
-    ]);
+pub fn main() {
+    // Init components (For more info on common collections, refer to chapter 8.1)
+    let mut positions = vec![
+        // This is "basic constructor" syntax for structs. In rust there are no language level
+        // "constructors" like Java, C++, C# and many other languages do. All structs can be
+        // constructed by default like this. If more complex constructing logic is needed, one can
+        // define a "constructor" as an associated function like this:
+        //
+        //      struct MyStruct { /* fields */ }
+        //
+        //      impl MyStruct {
+        //          // Note there is no `self` parameter, this is called an "associated function"
+        //          pub fn constructor_name() -> MyStruct {
+        //              MyStruct { /* fields */ }
+        //          }
+        //      }
+        //
+        //      // Now we can construct a MyStruct using
+        //      let my_struct = MyStruct::constructor_name();
+        //
+        // But, as we are not doing anything too complex here, it is sufficient to just use the
+        // regular struct instantiation. (For more info on structs, refer to chapter 5.)
+        PositionComponent { x: 0.0, y: 0.0 },
+        PositionComponent { x: -42.0, y: -42.0 },
+        PositionComponent { x: 234.0, y: 123.0 },
+        PositionComponent { x: 6.0, y: 9.0 },
+    ];
+    let velocities = vec![
+        VelocityComponent { x: 40.0, y: 10.0 },
+        VelocityComponent { x: 30.0, y: 20.0 },
+        VelocityComponent { x: 20.0, y: 30.0 },
+        VelocityComponent { x: 10.0, y: 40.0 },
+    ];
 
-    // Create systems
-    let adder = AdderSystem;
-    let printer = PrintSystem;
-    let value_printer = ValuePrintSystem;
+    // Get iterators for component vectors (For more info on iterators, refer to chapter 13.2)
+    let mut pos_iter = positions.iter_mut();
+    // Velocity iterator itself need to be mutable, even though the data it refers to is immutable.
+    // This is due to the fact that the `.next()` call mutates the iterator's state in order to
+    // proceed to the next element. In other words, the data is immutable, the iterator is not.
+    let mut vel_iter = velocities.iter();
 
-    // Print initial state
-    println!("Initial state:");
-    printer.tick((values.read(), amounts.read()));
+    // Iterate as long as both return `Some(x)`. When either return `None`, the execution will break
+    // out of the loop. This is "convenience inline pattern matching", so-called "if-let"- or
+    // "while-let" -syntax. (For more info, refer to chapter 18.)
+    while let (Some(pos), Some(vel)) = (pos_iter.next(), vel_iter.next()) {
+        pos.x += vel.x;
+        pos.y += vel.y;
+    }
 
-    // Advance a single tick and print state
-    adder.tick((values.write(), amounts.read()));
-    println!("After tick #1:");
-    printer.tick((values.read(), amounts.read()));
+    // Iterators have been exhausted and cannot be re-used. Shadow the old iterators by creating new
+    // ones with same names. Shadowing is just a fancy name for "hiding" the old variable by
+    // creating a new one with same name. (For more info, refer to chapter 3.1.)
+    let mut value_iter = positions.iter_mut();
 
-    // Advance another tick and print state
-    adder.tick((values.write(), amounts.read()));
-    println!("After tick #2:");
-    printer.tick((values.read(), amounts.read()));
-
-    println!("Values only:");
-    value_printer.tick((values.read(),));
+    // Again, use while-let to iterate until `None` occurs for the first time
+    while let Some(value) = value_iter.next() {
+        println!("Position: ({},{})", value.x, value.y)
+    }
 }
