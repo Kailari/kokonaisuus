@@ -1,33 +1,5 @@
 #![feature(assoc_int_consts)] // Allows use of things like `f64::EPSILON`
 
-/*
-Step 3. Iterating tuples of iterators
-Topics: Custom traits, Iterators, implementing traits on types we haven't defined ourselves
-
-New here:
-    -   "Systems" now use `for`-loops for iterating over the component iterators
-    -   Created utility traits for combining tuples of iterators into a single tuple-producing
-        iterator. Iterators in iterators, yay!
-    -   Cleaned up component creation with custom constructor-functions (`Component::new`)
-
-Notes:
-    Goal here is to get rid of the ugly `while-let` syntax in systems. Idea is simple: if we have
-    an tuple filled with iterators, shouldn't we be allowed to iterate on it? To accomplish this,
-    a fair bit of trait magic is required (actually no magic involved, the approach is just a bit
-    unintuitive due to language limitations).
-
-    All "systems" implement `IteratorTuple`-trait for their component iterators manually. (See top
-    of each system module. `apply_velocity.rs` has the most documentation about what's going on, so
-    see that and the `iter.rs`)
-
-    Current one-IteratorTuple-impl-per-system implementation is a bit iffy, but we'll look into that
-    in next part.
-
-    TL;DR:
-        -   See `apply_velocity.rs`
-        -   See `iter.rs`
-*/
-
 use self::components::{AccelerationComponent, FrictionComponent, PositionComponent, VelocityComponent};
 use self::systems::{apply_velocity, print_positions, apply_friction, apply_acceleration};
 

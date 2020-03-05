@@ -2,7 +2,6 @@ use crate::components::{AccelerationComponent, VelocityComponent};
 use crate::iter::{IteratorTuple, IterTuple};
 use std::slice::{IterMut, Iter};
 
-// Implement `IteratorTuple` for the component iterators required by this "system"
 impl<'a> IteratorTuple for (IterMut<'a, VelocityComponent>, Iter<'a, AccelerationComponent>) {
     type ItemTuple = (<IterMut<'a, VelocityComponent> as Iterator>::Item,
                       <Iter<'a, AccelerationComponent> as Iterator>::Item);
