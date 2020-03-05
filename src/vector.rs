@@ -1,4 +1,4 @@
-use std::ops::{Add, Mul, AddAssign};
+use std::ops::{Add, Mul, AddAssign, Sub};
 use std::fmt::{Display, Formatter};
 
 // What on earth does "derive" mean? There usually is an easy or straightforward way of implementing
@@ -19,22 +19,18 @@ pub struct Vector2d {
     pub y: f64,
 }
 
-// Trusty ol' `From`-implementation, for Vectors this time
 impl From<(f64, f64)> for Vector2d {
     fn from(source: (f64, f64)) -> Self {
         Vector2d { x: source.0, y: source.1 }
     }
 }
 
-// Implement `Display` for vectors. This allows nice formatting when printing out.
 impl Display for Vector2d {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "({:.3}, {:.3})", self.x, self.y)
     }
 }
 
-// Implement add for vectors. Implementation performs component-wise sum.
-// This allows the use of the `+` operator on two vectors.
 impl Add for Vector2d {
     type Output = Vector2d;
 
@@ -46,7 +42,17 @@ impl Add for Vector2d {
     }
 }
 
-// Implement adding assignment for vectors. This allows doing `vec_a += vec_b`
+impl Sub for Vector2d {
+    type Output = Vector2d;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Vector2d {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
 impl AddAssign for Vector2d{
     fn add_assign(&mut self, rhs: Self) {
         self.x += rhs.x;
@@ -54,7 +60,6 @@ impl AddAssign for Vector2d{
     }
 }
 
-// Implement scalar multiplication. This allows `let vec_b = vec_a * 42.0`
 impl Mul<f64> for Vector2d {
     type Output = Vector2d;
 
@@ -66,11 +71,6 @@ impl Mul<f64> for Vector2d {
     }
 }
 
-// Wait a minute, `impl` without specifying a trait?
-//
-// Well, nothing special here, this is the (bit awkward) syntax for specifying methods and
-// associated functions for structs. These methods are not associated with any trait, but rather
-// the struct itself.
 impl Vector2d {
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
@@ -92,6 +92,13 @@ impl Vector2d {
         Vector2d {
             x: self.x.abs(),
             y: self.y.abs(),
+        }
+    }
+
+    pub fn max(&self, max: f64) -> Self {
+        Vector2d {
+            x: self.x.max(max),
+            y: self.y.max(max),
         }
     }
 }

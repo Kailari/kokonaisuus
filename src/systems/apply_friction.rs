@@ -11,9 +11,8 @@ pub fn apply_friction(velocities: &mut Vec<VelocityComponent>, frictions: &Vec<F
         }
 
         let friction = vel.value.normalize().abs() * fri.value;
-        let magnitude_x = (vel.value.x.abs() - friction.x).max(0.0);
-        let magnitude_y = (vel.value.y.abs() - friction.y).max(0.0);
-        vel.value.x = vel.value.x.signum() * magnitude_x;
-        vel.value.y = vel.value.y.signum() * magnitude_y;
+        let magnitude = (vel.value.abs() - friction).max(0.0);
+        vel.value.x = vel.value.x.signum() * magnitude.x;
+        vel.value.y = vel.value.y.signum() * magnitude.y;
     }
 }
