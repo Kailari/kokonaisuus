@@ -17,9 +17,10 @@ impl<'a> System<'a> for ApplyFrictionSystem {
                 continue;
             }
 
-        let friction = vel.value.normalize().abs() * fri.value;
-        let magnitude = (vel.value.abs() - friction).max(0.0);
-        vel.value.x = vel.value.x.signum() * magnitude.x;
-        vel.value.y = vel.value.y.signum() * magnitude.y;
+            let friction = vel.value.normalize().abs() * fri.value;
+            let magnitude = (vel.value.abs() - friction).max(0.0);
+            vel.value.x = vel.value.x.signum() * magnitude.x;
+            vel.value.y = vel.value.y.signum() * magnitude.y;
+        }
     }
 }
