@@ -15,7 +15,7 @@ impl<A, B> IteratorTuple for (A, B)
 
     fn next_all(&mut self) -> Option<Self::ItemTuple> {
         match (self.0.next(), self.1.next()) {
-            (Some(pos), Some(vel)) => Some((pos, vel)),
+            (Some(a), Some(b)) => Some((a, b)),
             _ => None,
         }
     }
