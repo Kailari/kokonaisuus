@@ -96,10 +96,10 @@ use crate::components::{AccelerationComponent, FrictionComponent, PositionCompon
 //      any short-lived instances.
 //  -   Ultimatum: "These fields are boxed trait objects that implement the `Any` trait"
 pub struct ComponentStorage {
-    positions: Box<dyn Any>,
-    velocities: Box<dyn Any>,
-    accelerations: Box<dyn Any>,
-    frictions: Box<dyn Any>,
+    positions: RefCell<Vec<PositionComponent>>,
+    velocities: RefCell<Vec<VelocityComponent>>,
+    accelerations: RefCell<Vec<AccelerationComponent>>,
+    frictions: RefCell<Vec<FrictionComponent>>,
 }
 
 impl ComponentStorage {
@@ -115,116 +115,62 @@ impl ComponentStorage {
         //  4.  As type of `positions` is `Box<dyn Any>`, from compiler perspective, all we know 
         //      about it from now on is that it implements `Any`. Yes, we just lost type-safety.
         ComponentStorage {
-            positions: Box::new(RefCell::new(vec![
+            positions: RefCell::new(vec![
                 PositionComponent::new(0.0, 0.0),
                 PositionComponent::new(-42.0, -42.0),
                 PositionComponent::new(234.0, 123.0),
                 PositionComponent::new(6.0, 9.0),
-            ])),
-            velocities: Box::new(RefCell::new(vec![
+            ]),
+            velocities: RefCell::new(vec![
                 VelocityComponent::new(40.0, 10.0),
                 VelocityComponent::new(30.0, 20.0),
                 VelocityComponent::new(20.0, 30.0),
                 VelocityComponent::new(10.0, 40.0),
-            ])),
-            frictions: Box::new(RefCell::new(vec![
+            ]),
+            frictions: RefCell::new(vec![
                 FrictionComponent::new(1.0),
                 FrictionComponent::new(2.0),
                 FrictionComponent::new(3.0),
                 FrictionComponent::new(4.0),
-            ])),
-            accelerations: Box::new(RefCell::new(vec![
+            ]),
+            accelerations: RefCell::new(vec![
                 AccelerationComponent::new(2.0, 16.0),
                 AccelerationComponent::new(4.0, 2.0),
                 AccelerationComponent::new(8.0, 4.0),
                 AccelerationComponent::new(16.0, 8.0),
-            ])),
+            ]),
         }
     }
 
-    // Next up, the actual, anti-climatic "magic-trick" to allow fetching component storages by
-    // only knowing its component type. There are two variants, `fetch_mut` and `fetch_ref` for
-    // fetching storages as mutable or immutable.
-    
-    // Fetch a mutable reference to a component storage with component type `C`
     pub fn fetch_mut<C>(&self) -> RefMut<Vec<C>>
-        where C: Any // `C` must implement `Any` so that we can use it in `TypeId::of::<C>()`
+        where C: Any
     {
-        // This is the first trick. Basically, this counts as runtime reflection; we are fetching
-        // type information dynamically at runtime. Although, this is nothing more special than
-        // fetching a compiler assigned type-id of the component type. `TypeId::of` is guaranteed
-        // to have the same return value for two equal invocations (if `C` is the same, that is)
-        let component_type_id = TypeId::of::<C>();
-
-        // Now, we have a `u64` wrapped into a `TypeId`, describing which component type we are
-        // working with. Get box the storage cell is in
-        let storage_raw = {
-            // Now, as we are writing implementation for fixed number of components, just treat each 
-            // component type as a special-case and panic if type is anything else.
-            if component_type_id == TypeId::of::<PositionComponent>() {
-                // We do not wish to move the positions out of `self`, so return as a reference
-                &self.positions
-            } else if component_type_id == TypeId::of::<VelocityComponent>() {
-                &self.velocities
-            } else if component_type_id == TypeId::of::<AccelerationComponent>() {
-                &self.accelerations
-            } else if component_type_id == TypeId::of::<FrictionComponent>() {
-                &self.frictions
-            } else {
-                panic!("Unknown component type!")
-            } // No semicolon, selected component cell is treated as return value
-        };
-
-        // Now, this is where it gets interesting. We have a `Box<dyn Any>`, but with the if-else
-        // spaghetti above, we have verified that for this specific box, the equivalence
-        //
-        //      Box<dyn Any> == Box<RefCell<Vec<C>>>
-        //
-        // holds. The sad thing is that the compiler is not as smart (or stupid) as we are. So, we
-        // somehow need to tell the compiler that these are actually the same type. This is called
-        // "downcasting a pointer" (box is essentially a pointer). 
-        //
-        // Luckily, `dyn Any` implements a `downcast_ref/mut` for downcasting the pointer mutably or
-        // immutably to any type. The cast then returns an `Option` based on whether or not the cast
-        // was actually possible.
-        //
-        // So:
-        //  1.  We have a pointer to `dyn Any`
-        //  2.  We know that this pointer points to data that has type `RefCell<Vec<C>>`
-        //  3.  Trait object `dyn Any` has a method `downcast_ref`, which we can use to downcast the
-        //      pointer to any other type, bypassing compiler restrictions
-        //  4.  Downcast returns an `Option`, we expect it to be `Some(value)` and panic with error
-        //      message if it is `None`
-        //  5.  We now have the `RefCell<Vec<C>>`
-        let storage = storage_raw.downcast_ref::<RefCell<Vec<C>>>()
-            .expect("Downcasting mutable storage RefCell failed!");
-        
-        // Borrow the value inside the `RefCell` mutably and return the reference wrapper
-        storage.borrow_mut()
+        self.fetch_component_storage::<C>()
+            .borrow_mut()
     }
 
-    // The very same thing as the above, but we borrow immutably instead of mutably at the very end
     pub fn fetch_ref<C>(&self) -> Ref<Vec<C>>
         where C: Any
     {
-        let component_type_id = TypeId::of::<C>();
+        self.fetch_component_storage::<C>()
+            .borrow()
+    }
 
-        let storage_raw = {
-            if component_type_id == TypeId::of::<PositionComponent>() {
-                &self.positions
-            } else if component_type_id == TypeId::of::<VelocityComponent>() {
-                &self.velocities
-            } else if component_type_id == TypeId::of::<AccelerationComponent>() {
-                &self.accelerations
-            } else if component_type_id == TypeId::of::<FrictionComponent>() {
-                &self.frictions
-            } else {
-                panic!("Unknown component type!")
-            }
+    fn fetch_component_storage<C: 'static>(&self) -> &RefCell<Vec<C>> {
+        let component_type_id = TypeId::of::<C>();
+        let storage = if component_type_id == TypeId::of::<PositionComponent>() {
+            &self.positions as &dyn Any
+        } else if component_type_id == TypeId::of::<VelocityComponent>() {
+            &self.velocities as &dyn Any
+        } else if component_type_id == TypeId::of::<AccelerationComponent>() {
+            &self.accelerations as &dyn Any
+        } else if component_type_id == TypeId::of::<FrictionComponent>() {
+            &self.frictions as &dyn Any
+        } else {
+            panic!("Unknown component type!")
         };
 
-        let storage = storage_raw.downcast_ref::<RefCell<Vec<C>>>()
-            .expect("Downcasting immutable storage RefCell failed!");
-        storage.borrow() // This is the only difference to when compared the `fetch_mut`
+        storage.downcast_ref::<RefCell<Vec<C>>>()
+               .expect("Downcasting mutable storage RefCell failed!")
     }
 }
