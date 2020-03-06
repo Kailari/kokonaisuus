@@ -2,7 +2,6 @@ use crate::components::{FrictionComponent, VelocityComponent};
 use crate::iter::IterTuple;
 use crate::systems::System;
 
-// See `apply_acceleration.rs` for info
 pub struct ApplyFrictionSystem;
 
 impl<'a> System<'a> for ApplyFrictionSystem {

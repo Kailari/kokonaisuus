@@ -2,7 +2,6 @@ use crate::components::{AccelerationComponent, FrictionComponent, PositionCompon
 use crate::iter::IterTuple;
 use crate::systems::System;
 
-// See `apply_acceleration.rs` for info
 pub struct PrintStateSystem;
 
 impl<'a> System<'a> for PrintStateSystem {

@@ -2,7 +2,6 @@ use crate::components::{PositionComponent, VelocityComponent};
 use crate::iter::IterTuple;
 use crate::systems::System;
 
-// See `apply_acceleration.rs` for info
 pub struct ApplyVelocitySystem;
 
 impl<'a> System<'a> for ApplyVelocitySystem {

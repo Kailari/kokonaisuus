@@ -20,10 +20,6 @@ impl Dispatcher {
         }
     }
 
-    // This is almost directly copy-pasted from `main.rs`. Basically the only changes are that the
-    // functions we imported previously are now wrapped into a "system struct" and implemented as
-    // `System::tick`. Additionally, the component storage vectors are wrapped in another struct
-    // called `ComponentStorage`
     pub fn dispatch(&self, components: &mut ComponentStorage) {
         println!("State before tick:");
         self.print_state.tick((&components.positions, &components.velocities, &components.accelerations, &components.frictions));

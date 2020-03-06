@@ -1,7 +1,6 @@
 use crate::components::PositionComponent;
 use crate::systems::System;
 
-// See `apply_acceleration.rs` for info
 pub struct PrintPositionsSystem;
 
 impl<'a> System<'a> for PrintPositionsSystem {
