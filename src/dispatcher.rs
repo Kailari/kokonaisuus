@@ -1,5 +1,5 @@
-use crate::component_storage::ComponentStorage;
 use crate::components::{AccelerationComponent, FrictionComponent, PositionComponent, VelocityComponent};
+use crate::storage::ComponentStorage;
 use crate::systems::{ApplyAccelerationSystem, ApplyFrictionSystem, ApplyVelocitySystem, PrintPositionsSystem, PrintStateSystem, System};
 
 pub struct Dispatcher {
@@ -24,30 +24,30 @@ impl Dispatcher {
     pub fn dispatch(&self, storage: &mut ComponentStorage) {
         println!("State before tick:");
         self.print_state.tick((
-            storage.fetch_ref::<PositionComponent>().as_ref(),
-            storage.fetch_ref::<VelocityComponent>().as_ref(),
-            storage.fetch_ref::<AccelerationComponent>().as_ref(),
-            storage.fetch_ref::<FrictionComponent>().as_ref(),
+            storage.fetch_ref::<PositionComponent>(),
+            storage.fetch_ref::<VelocityComponent>(),
+            storage.fetch_ref::<AccelerationComponent>(),
+            storage.fetch_ref::<FrictionComponent>(),
         ));
 
         self.apply_acceleration.tick((
-            storage.fetch_mut::<VelocityComponent>().as_mut(),
-            storage.fetch_ref::<AccelerationComponent>().as_ref(),
+            storage.fetch_mut::<VelocityComponent>(),
+            storage.fetch_ref::<AccelerationComponent>(),
         ));
 
         self.apply_friction.tick((
-            storage.fetch_mut::<VelocityComponent>().as_mut(),
-            storage.fetch_ref::<FrictionComponent>().as_ref(),
+            storage.fetch_mut::<VelocityComponent>(),
+            storage.fetch_ref::<FrictionComponent>(),
         ));
 
         self.apply_velocity.tick((
-            storage.fetch_mut::<PositionComponent>().as_mut(),
-            storage.fetch_ref::<VelocityComponent>().as_ref(),
+            storage.fetch_mut::<PositionComponent>(),
+            storage.fetch_ref::<VelocityComponent>(),
         ));
 
         println!("\nPositions after tick:");
         self.print_positions.tick(
-            storage.fetch_ref::<PositionComponent>().as_ref()
+            storage.fetch_ref::<PositionComponent>(),
         );
     }
 }

@@ -1,16 +1,17 @@
 use crate::components::{FrictionComponent, VelocityComponent};
 use crate::iter::IterTuple;
+use crate::storage::{Read, Write};
 use crate::systems::System;
 
 pub struct ApplyFrictionSystem;
 
 impl<'a> System<'a> for ApplyFrictionSystem {
-    type InputData = (&'a mut Vec<VelocityComponent>, 
-                      &'a Vec<FrictionComponent>);
-    
-    fn tick(&self, (velocities, frictions): Self::InputData) {
-        let vel_iter = velocities.iter_mut();
-        let fri_iter = frictions.iter();
+    type InputData = (Write<'a, VelocityComponent>,
+                      Read<'a, FrictionComponent>);
+
+    fn tick(&self, (mut velocities, frictions): Self::InputData) {
+        let vel_iter = velocities.iterate();
+        let fri_iter = frictions.iterate();
 
         for (vel, fri) in IterTuple::from((vel_iter, fri_iter)) {
             if vel.value.length_squared() < f64::EPSILON {
